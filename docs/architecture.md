@@ -115,7 +115,7 @@ O modelo relacional é composto pelas entidades abaixo. O diagrama completo pode
 
 | Coluna | Tipo | Restrições |
 | ------ | ---- | ---------- |
-| `id` | integer | PK, auto-increment |
+| `id/código_convite` | string | PK |
 | `nome` | varchar | NOT NULL |
 | `descricao` | text | |
 | `data_inicio` | date | |
@@ -147,7 +147,6 @@ O modelo relacional é composto pelas entidades abaixo. O diagrama completo pode
 | `latitude` | float | |
 | `longitude` | float | |
 | `fotoCatalogo` | varchar | |
-| `media_avaliacao` | float | default: 0 |
 
 **destino_viagem**
 
@@ -161,19 +160,26 @@ O modelo relacional é composto pelas entidades abaixo. O diagrama completo pode
 | `descricao` | text | |
 | `ordem` | integer | |
 
-**atividade**
+**catalogo_atividade**
 
 | Coluna | Tipo | Restrições |
 | ------ | ---- | ---------- |
 | `id` | integer | PK, auto-increment |
-| `destino_viagem_id` | integer | NOT NULL, FK → destino_viagem.id |
 | `nome` | varchar | NOT NULL |
+| `media_avaliacao` | float | default: 0 |
 | `tipoAtividade` | tipo_atividade | NOT NULL |
 | `local` | varchar | |
+| `fotoAtividade` | varchar | |
+
+**atividade_viagem**
+
+| Coluna | Tipo | Restrições |
+| `id` | integer | PK, auto-increment |
+| `destino_viagem_id` | integer | NOT NULL, FK → destino_viagem.id |
+| `avaliacao_id` | integer | NOT NULL, FK → avalicao.id |
 | `data_horario` | timestamp | |
 | `duracao_min` | integer | |
 | `custo_previsto` | decimal(10,2) | |
-| `fotoAtividade` | varchar | |
 | `status` | status_atividade | NOT NULL |
 
 **orcamento**
@@ -191,7 +197,7 @@ O modelo relacional é composto pelas entidades abaixo. O diagrama completo pode
 | ------ | ---- | ---------- |
 | `id` | integer | PK, auto-increment |
 | `usuario_id` | integer | NOT NULL, FK → usuario.id |
-| `destino_catalogo_id` | integer | NOT NULL, FK → destino_catalogo.id |
+| `atividade_catalogo_id` | integer | NOT NULL, FK → destino_catalogo.id |
 | `nota` | integer | NOT NULL (1 a 5) |
 | `comentario` | text | |
 | `criado_em` | timestamp | default: `now()` |
@@ -205,10 +211,11 @@ O modelo relacional é composto pelas entidades abaixo. O diagrama completo pode
 | `membro_viagem.usuario_id` | `usuario.id` | N:1 |
 | `destino_viagem.viagem_id` | `viagem.id` | N:1 |
 | `destino_viagem.destino_catalogo_id` | `destino_catalogo.id` | N:1 |
-| `atividade.destino_viagem_id` | `destino_viagem.id` | N:1 |
+| `atividade_viagem.destino_viagem_id` | `destino_viagem.id` | N:1 |
+| `atividade_viagem.avaliacao_id` | `avaliacao.id` | N:1 |
 | `orcamento.viagem_id` | `viagem.id` | 1:1 |
 | `avaliacao.usuario_id` | `usuario.id` | N:1 |
-| `avaliacao.destino_catalogo_id` | `destino_catalogo.id` | N:1 |
+| `avaliacao.atividade_catalogo_id` | `atividade_catalogo.id` | N:1 |
 
 ### **5.2 Diagrama Lógico de Dados**
 
@@ -221,15 +228,17 @@ viagem(#id, nome, descricao, data_inicio, data_fim, status, *criado_por→usuari
 
 membro_viagem(#id, *viagem_id→viagem, *usuario_id→usuario, permissao, entrou_em)
 
-destino_catalogo(#id, nome, cidade, pais, categoria, descricao, latitude, longitude, fotoCatalogo, media_avaliacao)
+destino_catalogo(#id, nome, cidade, pais, categoria, descricao, latitude, longitude, fotoCatalogo)
 
 destino_viagem(#id, *viagem_id→viagem, *destino_catalogo_id→destino_catalogo, chegada, saida, descricao, ordem)
 
-atividade(#id, *destino_viagem_id→destino_viagem, nome, tipoAtividade, local, data_horario, duracao_min, custo_previsto, fotoAtividade, status)
+catalogo_atividade(#id, nome, media_avaliacao, tipoAtividade, local, fotoAtividade)
+
+atividade_viagem(#id, *destino_viagem_id→destino_viagem, *avaliacao_id→avaliacao, data_horario, duracao_min, custo_previsto, status)
 
 orcamento(#id, *viagem_id→viagem, valor_total, previsto_atividades)
 
-avaliacao(#id, *usuario_id→usuario, *destino_catalogo_id→destino_catalogo, nota, comentario, criado_em)
+avaliacao(#id, *usuario_id→usuario, *atividade_catalogo_id→catalogo_atividade, nota, comentario, criado_em)
 ```
 > Legenda: `#` chave primária · `*` chave estrangeira
 
