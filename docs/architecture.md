@@ -32,7 +32,7 @@ Este documento descreve a representação da arquitetura cliente-servidor adotad
 
 A aplicação adota uma **arquitetura cliente-servidor** com separação clara entre frontend e backend:
 
-- **Frontend:** aplicação web responsiva que consome a API REST do backend e exibe o mapa interativo utilizando uma biblioteca de mapas (ex.: Leaflet.js + OpenStreetMap, ou Google Maps API).
+- **Frontend:** aplicação web responsiva que consome a API REST do backend e exibe o mapa interativo para preencher utilizando uma biblioteca de mapas (ex.: jsVectorMap).
 - **Backend:** API REST responsável pela lógica de negócio, autenticação, persistência de dados e controle de permissões.
 - **Banco de Dados:** armazenamento relacional (a tecnologia específica será definida pela equipe durante o desenvolvimento).
 
