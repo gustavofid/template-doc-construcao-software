@@ -63,7 +63,7 @@ A aplicação adota uma **arquitetura cliente-servidor** com separação clara e
 |Plataforma|Web (navegador)|
 |Segurança|Senhas com hash; autenticação via JWT; controle de acesso por viagem|
 |Idioma|Português (pt-BR)|
-|Mapa interativo|Leaflet.js + OpenStreetMap ou Google Maps API|
+|Mapa interativo|ex: jsVectormap|
 
 ## **4. Visão Lógica**
 
