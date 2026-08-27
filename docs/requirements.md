@@ -98,14 +98,14 @@ Requisitos funcionais descrevem **o que o sistema deve fazer**.
 | RF08 | O sistema deve permitir adicionar múltiplos destinos a uma viagem, com ordem de visita definida. | Alta |
 | RF09 | Cada destino deve conter: foto, nome/localização, datas de chegada e saída, descrição e categoria (cidade, praia, natureza, cultural, etc.). | Alta |
 | RF10 | O sistema deve permitir pesquisar destinos já cadastrados na plataforma ao adicioná-los a uma viagem. | Média |
-| RF11 | O sistema deve visualizar os destinos de uma viagem em um mapa interativo, com marcadores e a rota entre eles. | Alta |
+| RF11 | O sistema deve mostrar em um mapa os países que o usuário já visitou | Média |
 
 ### Módulo 4 — Atividades
 
 | ID | Descrição | Prioridade |
 | -- | --------- | :--------: |
 | RF12 | O sistema deve permitir adicionar atividades dentro de cada destino (passeios, refeições, hospedagem, transporte, etc.). | Alta |
-| RF13 | Cada atividade deve conter: foto, nome, tipo/categoria, local, data e horário, duração estimada, custo previsto e status (*Pendente*, *Confirmada*, *Concluída*). | Alta |
+| RF13 | Cada atividade pode conter: foto, nome, tipo/categoria, local, data e horário, duração estimada, custo previsto e status (*Pendente*, *Confirmada*, *Concluída*). | Alta |
 | RF14 | O sistema deve listar atividades em ordem cronológica por destino. | Média |
 
 ### Módulo 5 — Orçamento
@@ -120,18 +120,18 @@ Requisitos funcionais descrevem **o que o sistema deve fazer**.
 
 | ID | Descrição | Prioridade |
 | -- | --------- | :--------: |
-| RF18 | O sistema deve permitir que o criador da viagem convide outros usuários por e-mail. | Alta |
+| RF18 | O sistema deve permitir que o criador da viagem convide outros usuários pelo código da viagem. | Alta |
 | RF19 | O sistema deve oferecer dois níveis de permissão para colaboradores: *Editor* (pode adicionar, editar e remover destinos, atividades e informações de orçamento) e *Visualizador* (acesso somente leitura). | Alta |
 | RF20 | O sistema deve permitir que o criador altere permissões ou remova colaboradores a qualquer momento. | Alta |
 | RF21 | O sistema deve enviar notificações in-app para colaboradores quando alterações relevantes forem feitas na viagem. | Média |
 
-### Módulo 7 — Avaliação e Descoberta de Destinos
+### Módulo 7 — Avaliação e Descoberta de Atividades
 
 | ID | Descrição | Prioridade |
 | -- | --------- | :--------: |
-| RF22 | O sistema deve permitir que usuários avaliem destinos que visitaram, atribuindo nota de 1 a 5 estrelas e um comentário. | Alta |
-| RF23 | O sistema deve exibir uma página pública de destino com: descrição, média de avaliações, reviews dos usuários e fotos. | Alta |
-| RF24 | O sistema deve oferecer um catálogo de destinos com busca por nome e filtros por nota mínima, categoria e localização. | Média |
+| RF22 | O sistema deve permitir que usuários avaliem atividades que fizeram, atribuindo nota de 1 a 5 estrelas e um comentário opcional. | Alta |
+| RF23 | O sistema deve exibir uma página pública de atividade com: descrição, média de avaliações, reviews dos usuários e fotos. | Alta |
+| RF24 | O sistema deve oferecer um catálogo de atividades com busca por nome e filtros por nota mínima, categoria e localização. | Média |
 | RF25 | O sistema deve destacar os destinos mais bem avaliados na página inicial. | Baixa |
 
 ## **4. Requisitos Não Funcionais**
