@@ -98,13 +98,13 @@ Requisitos funcionais descrevem **o que o sistema deve fazer**.
 | RF08 | O sistema deve permitir adicionar múltiplos destinos a uma viagem, com ordem de visita definida. | Alta |
 | RF09 | Cada destino deve conter: foto, nome/localização, datas de chegada e saída, descrição e categoria (cidade, praia, natureza, cultural, etc.). | Alta |
 | RF10 | O sistema deve permitir pesquisar destinos já cadastrados na plataforma ao adicioná-los a uma viagem. | Média |
-| RF11 | O sistema deve mostrar em um mapa os países que o usuário já visitou | Média |
+| RF11 | O sistema deve mostrar em um mapa os países que o usuário já visitou (jsVectormap) | Média | 
 
 ### Módulo 4 — Atividades
 
 | ID | Descrição | Prioridade |
 | -- | --------- | :--------: |
-| RF12 | O sistema deve permitir adicionar atividades dentro de cada destino (passeios, refeições, hospedagem, transporte, etc.). | Alta |
+| RF12 | O sistema deve permitir adicionar atividades cadastradas dentro de cada destino (passeios, refeições, hospedagem, transporte, etc.). | Alta |
 | RF13 | Cada atividade pode conter: foto, nome, tipo/categoria, local, data e horário, duração estimada, custo previsto e status (*Pendente*, *Confirmada*, *Concluída*). | Alta |
 | RF14 | O sistema deve listar atividades em ordem cronológica por destino. | Média |
 

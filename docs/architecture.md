@@ -30,28 +30,38 @@ Este documento descreve a representação da arquitetura cliente-servidor adotad
 
 ## **2. Representação da Arquitetura**
 
-A aplicação adota uma **arquitetura cliente-servidor** com separação clara entre frontend e backend:
+A aplicação adota uma **arquitetura cliente-servidor** com separação clara entre camadas e integrações externas:
 
-- **Frontend:** aplicação web responsiva que consome a API REST do backend e exibe o mapa interativo para preencher utilizando uma biblioteca de mapas (ex.: jsVectorMap).
-- **Backend:** API REST responsável pela lógica de negócio, autenticação, persistência de dados e controle de permissões.
-- **Banco de Dados:** armazenamento relacional (a tecnologia específica será definida pela equipe durante o desenvolvimento).
+- **Frontend:** aplicação web responsiva que consome a API REST do backend, renderiza a interface e exibe mapas e cadastros de atividades/locais.
+- **Backend:** API REST responsável pela lógica de negócio, autenticação, autorização, persistência e orquestração entre os serviços externos.
+- **Serviço de Mapas:** responsável pela visualização geográfica e roteamento em mapa, com biblioteca como Google Maps ou Leaflet/OpenStreetMap.
+- **Serviço de Locais/Atividades (catálogo_atividades):** integra a API do Google Places para complementar dados de locais, eventos, restaurantes, hotéis e pontos de interesse.
+- **Banco de Dados:** armazenamento relacional para usuários, viagens, destinos, atividades, orçamento e avaliações.
 
 ### **2.1 Diagrama de Relações**
 
 ```
-┌─────────────┐         ┌─────────────────┐         ┌─────────────┐
-│             │  HTTP   │                 │   SQL   │             │
-│  Frontend   │ ──────► │  Backend (API)  │ ──────► │   Banco de  │
-│  (Web App)  │ ◄────── │   REST + Auth   │ ◄────── │    Dados    │
-│             │         │                 │         │             │
-└─────────────┘         └─────────────────┘         └─────────────┘
-       │
-       │ Leaflet.js / Google Maps API
-       ▼
-┌─────────────┐
-│  Serviço de │
-│    Mapas    │
-└─────────────┘
+┌────────────────────┐      HTTP/JSON      ┌─────────────────────┐
+│                    │ ──────────────────► │                     │
+│  Frontend          │                     │  Backend (API)      │
+│  (Web App)         │ ◄────────────────── │  REST + Auth + RBAC │
+│  - Dashboard       │                     │                     │
+│  - Viagens         │                     │                     │
+│  - Destinos        │                     │                     │
+│  - Orçamento       │                     │                     │
+└────────────────────┘                     └──────────┬──────────┘
+                                                        │
+                        ┌───────────────────────────────┼───────────────────────────────┐
+                        │                               │                               │
+                        ▼                               ▼                               ▼
+                ┌─────────────────────┐       ┌──────────────────────────────┐      ┌─────────────────────┐
+                │  Serviço de Mapas   │       │  Serviço de Locais/Atividades │      │  Banco de Dados     │
+                │  Google Maps /      │       │  Google Places API           │      │  PostgreSQL/MySQL  │
+                │  Leaflet + OSM      │       │  - catálogo_atividades       │      │  - usuarios         │
+                │  - geolocalização   │       │  - busca por locais          │      │  - viagens          │
+                │  - rotas            │       │  - dados de pontos de       │      │  - destinos         │
+                │  - marcadores       │       │    interesse                 │      │  - atividades       │
+                └─────────────────────┘       └──────────────────────────────┘      └─────────────────────┘
 ```
 
 ## **3. Metas e Restrições de Arquitetura**
@@ -63,17 +73,21 @@ A aplicação adota uma **arquitetura cliente-servidor** com separação clara e
 |Plataforma|Web (navegador)|
 |Segurança|Senhas com hash; autenticação via JWT; controle de acesso por viagem|
 |Idioma|Português (pt-BR)|
-|Mapa interativo|ex: jsVectormap|
+|Mapa interativo|ex: jsVectormap/Google Maps API|
 
 ## **4. Visão Lógica**
 
 ### **4.1 Visão geral: Pacotes e Camadas**
 
-O sistema é organizado em três camadas principais:
+O sistema é organizado em cinco blocos principais:
 
-- **Camada de Apresentação (Frontend):** responsável pela interface com o usuário — renderização de telas, formulários, mapa interativo e consumo da API REST.
-- **Camada de Negócio (Backend / API REST):** responsável pelas regras de negócio, autenticação, controle de permissões e orquestração das operações sobre os dados.
-- **Camada de Dados (Banco de Dados):** responsável pela persistência das informações — usuários, viagens, destinos, atividades, orçamentos e avaliações.
+- **Camada de Apresentação (Frontend):** responsável pela interface com o usuário — renderização de telas, formulários, mapa interativo, filtros de busca e consumo da API REST.
+- **Camada de Negócio (Backend / API REST):** responsável pelas regras de negócio, autenticação, controle de permissões, criação de viagens e orquestração de operações sobre dados e integrações externas.
+- **Serviço de Mapas:** encapsula a lógica de renderização geográfica, geolocalização, rotas e marcadores em mapas interativos.
+- **Serviço de Locais/Atividades (catálogo_atividades):** integra a Google Places API para buscar, validar e enriquecer informações de locais, atrações e estabelecimentos que podem ser cadastrados em viagens ou atividades.
+- **Camada de Dados (Banco de Dados):** responsável pela persistência das informações — usuários, viagens, destinos, atividades, orçamento, avaliações e referências ao catálogo externo.
+
+> O backend deve manter um catálogo interno de atividades/locais, sincronizando dados com o Google Places API quando necessário e preservando registros próprios de avaliações e contexto da viagem.
 
 ### **4.2 Organização do Código**
 
@@ -140,13 +154,14 @@ O modelo relacional é composto pelas entidades abaixo. O diagrama completo pode
 | ------ | ---- | ---------- |
 | `id` | integer | PK, auto-increment |
 | `nome` | varchar | NOT NULL |
-| `cidade` | varchar | |
 | `pais` | varchar | |
 | `categoria` | categoria_destino | |
 | `descricao` | text | |
 | `latitude` | float | |
 | `longitude` | float | |
-| `fotoCatalogo` | varchar | |
+| `foto_url` | varchar | |
+
+> Como cada destino representa uma cidade do mundo, o campo `nome` deve indicar a cidade em si, e o país é informado separadamente para contextualização geográfica.
 
 **destino_viagem**
 
@@ -166,17 +181,26 @@ O modelo relacional é composto pelas entidades abaixo. O diagrama completo pode
 | ------ | ---- | ---------- |
 | `id` | integer | PK, auto-increment |
 | `nome` | varchar | NOT NULL |
-| `media_avaliacao` | float | default: 0 |
-| `tipoAtividade` | tipo_atividade | NOT NULL |
+| `descricao` | text | |
+| `tipo_atividade` | tipo_atividade | NOT NULL |
 | `local` | varchar | |
-| `fotoAtividade` | varchar | |
+| `cidade` | varchar | |
+| `pais` | varchar | |
+| `latitude` | float | |
+| `longitude` | float | |
+| `google_place_id` | varchar | UNIQUE |
+| `foto_url` | varchar | |
+| `fonte` | varchar | default: `google_places` |
+| `media_avaliacao` | float | default: 0 |
+| `criado_em` | timestamp | default: `now()` |
 
 **atividade_viagem**
 
 | Coluna | Tipo | Restrições |
+| ------ | ---- | ---------- |
 | `id` | integer | PK, auto-increment |
 | `destino_viagem_id` | integer | NOT NULL, FK → destino_viagem.id |
-| `avaliacao_id` | integer | NOT NULL, FK → avalicao.id |
+| `catalogo_atividade_id` | integer | NOT NULL, FK → catalogo_atividade.id |
 | `data_horario` | timestamp | |
 | `duracao_min` | integer | |
 | `custo_previsto` | decimal(10,2) | |
@@ -197,7 +221,7 @@ O modelo relacional é composto pelas entidades abaixo. O diagrama completo pode
 | ------ | ---- | ---------- |
 | `id` | integer | PK, auto-increment |
 | `usuario_id` | integer | NOT NULL, FK → usuario.id |
-| `atividade_catalogo_id` | integer | NOT NULL, FK → destino_catalogo.id |
+| `catalogo_atividade_id` | integer | NOT NULL, FK → catalogo_atividade.id |
 | `nota` | integer | NOT NULL (1 a 5) |
 | `comentario` | text | |
 | `criado_em` | timestamp | default: `now()` |
@@ -212,10 +236,10 @@ O modelo relacional é composto pelas entidades abaixo. O diagrama completo pode
 | `destino_viagem.viagem_id` | `viagem.id` | N:1 |
 | `destino_viagem.destino_catalogo_id` | `destino_catalogo.id` | N:1 |
 | `atividade_viagem.destino_viagem_id` | `destino_viagem.id` | N:1 |
-| `atividade_viagem.avaliacao_id` | `avaliacao.id` | N:1 |
+| `atividade_viagem.catalogo_atividade_id` | `catalogo_atividade.id` | N:1 |
 | `orcamento.viagem_id` | `viagem.id` | 1:1 |
 | `avaliacao.usuario_id` | `usuario.id` | N:1 |
-| `avaliacao.atividade_catalogo_id` | `atividade_catalogo.id` | N:1 |
+| `avaliacao.catalogo_atividade_id` | `catalogo_atividade.id` | N:1 |
 
 ### **5.2 Diagrama Lógico de Dados**
 
@@ -228,17 +252,17 @@ viagem(#id, nome, descricao, data_inicio, data_fim, status, *criado_por→usuari
 
 membro_viagem(#id, *viagem_id→viagem, *usuario_id→usuario, permissao, entrou_em)
 
-destino_catalogo(#id, nome, cidade, pais, categoria, descricao, latitude, longitude, fotoCatalogo)
+destino_catalogo(#id, nome, pais, categoria, descricao, latitude, longitude, foto_url)
 
 destino_viagem(#id, *viagem_id→viagem, *destino_catalogo_id→destino_catalogo, chegada, saida, descricao, ordem)
 
-catalogo_atividade(#id, nome, media_avaliacao, tipoAtividade, local, fotoAtividade)
+catalogo_atividade(#id, nome, descricao, tipo_atividade, local, cidade, pais, latitude, longitude, google_place_id, foto_url, fonte, media_avaliacao, criado_em)
 
-atividade_viagem(#id, *destino_viagem_id→destino_viagem, *avaliacao_id→avaliacao, data_horario, duracao_min, custo_previsto, status)
+atividade_viagem(#id, *destino_viagem_id→destino_viagem, *catalogo_atividade_id→catalogo_atividade, data_horario, duracao_min, custo_previsto, status)
 
 orcamento(#id, *viagem_id→viagem, valor_total, previsto_atividades)
 
-avaliacao(#id, *usuario_id→usuario, *atividade_catalogo_id→catalogo_atividade, nota, comentario, criado_em)
+avaliacao(#id, *usuario_id→usuario, *catalogo_atividade_id→catalogo_atividade, nota, comentario, criado_em)
 ```
 > Legenda: `#` chave primária · `*` chave estrangeira
 
